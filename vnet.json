@@ -1,0 +1,392 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.451.19169",
+      "templateHash": "13150869408907550376"
+    }
+  },
+  "parameters": {
+    "psk": {
+      "type": "secureString"
+    }
+  },
+  "functions": [],
+  "variables": {
+    "NetworkSecurityGroupNameOP": "[format('{0}-{1}', variables('vnetnameop'), 'nsg')]",
+    "vnetnameop": "[format('vnet-001-{0}', 'op')]",
+    "snet1nameop": "[format('snet-001-{0}', 'op')]",
+    "snet2nameop": "[format('snet-002-{0}', 'op')]",
+    "addressPrefixop": "172.16.0.0/15",
+    "SubnetPrefix1op": "172.16.1.0/24",
+    "SubnetPrefix2op": "172.16.2.0/24",
+    "GatewaySubnetPrefix": "172.16.3.0/27",
+    "locationop": "westeurope",
+    "gatewaynameop": "[format('{0}-{1}', variables('vnetnameop'), 'gw')]",
+    "gatewaysubnet": "GatewaySubnet",
+    "subnetrefop": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetnameop'), variables('gatewaysubnet'))]",
+    "localgatewaynameop": "[format('{0}-lgw', variables('vnetnameop'))]",
+    "NetworkSecurityGroupNameEU": "[format('{0}-{1}', variables('vnetnameeu'), 'nsg')]",
+    "vnetnameeu": "[format('vnet-001-{0}', 'eu')]",
+    "snet1nameeu": "[format('snet-001-{0}', 'eu')]",
+    "snet2nameeu": "[format('snet-002-{0}', 'eu')]",
+    "addressPrefixeu": "10.0.0.0/15",
+    "SubnetPrefix1eu": "10.0.0.0/24",
+    "SubnetPrefix2eu": "10.1.0.0/24",
+    "locationeu": "westeurope",
+    "NetworkSecurityGroupNameEUS": "[format('{0}-{1}', variables('vnetnameeus'), 'nsg')]",
+    "vnetnameeus": "[format('vnet-001-{0}', 'eus')]",
+    "snet1nameeus": "[format('snet-001-{0}', 'eus')]",
+    "snet2nameeus": "[format('snet-002-{0}', 'eus')]",
+    "addressPrefixeus": "192.168.0.0/16",
+    "SubnetPrefix1eus": "192.168.1.0/24",
+    "SubnetPrefix2eus": "192.168.2.0/24",
+    "locationeus": "eastus"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('NetworkSecurityGroupNameEU')]",
+      "location": "[variables('locationeu')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow3389",
+            "properties": {
+              "priority": 1000,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPInbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPOutbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Outbound",
+              "destinationPortRange": "3389",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('vnetnameeu')]",
+      "location": "[variables('locationeu')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefixeu')]"
+          ]
+        },
+        "enableDdosProtection": false,
+        "enableVmProtection": false,
+        "subnets": [
+          {
+            "name": "[variables('snet1nameeu')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix1eu')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEU'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('snet2nameeu')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix2eu')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEU'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEU'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('NetworkSecurityGroupNameOP')]",
+      "location": "[variables('locationop')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow3389",
+            "properties": {
+              "priority": 1000,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPInbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPOutbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Outbound",
+              "destinationPortRange": "3389",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('vnetnameop')]",
+      "location": "[variables('locationop')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefixop')]"
+          ]
+        },
+        "enableDdosProtection": false,
+        "enableVmProtection": false,
+        "subnets": [
+          {
+            "name": "[variables('snet1nameop')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix1op')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameOP'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('snet2nameop')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix2op')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameOP'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('gatewaysubnet')]",
+            "properties": {
+              "addressPrefix": "[variables('GatewaySubnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameOP'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-06-01",
+      "name": "[format('{0}-pip', variables('gatewaynameop'))]",
+      "location": "[variables('locationop')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('gatewaynameop')]",
+      "location": "[variables('locationop')]",
+      "properties": {
+        "gatewayType": "Vpn",
+        "ipConfigurations": [
+          {
+            "name": "default",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', variables('gatewaynameop')))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetrefop')]"
+              },
+              "privateIPAllocationMethod": "Dynamic"
+            }
+          }
+        ],
+        "sku": {
+          "name": "VpnGw2",
+          "tier": "VpnGw2"
+        },
+        "vpnType": "RouteBased",
+        "vpnGatewayGeneration": "Generation2",
+        "activeActive": false,
+        "enableBgp": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('{0}-pip', variables('gatewaynameop')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/localNetworkGateways",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('localgatewaynameop')]",
+      "location": "[variables('locationeu')]",
+      "properties": {
+        "gatewayIpAddress": "20.25.3.4"
+      }
+    },
+    {
+      "type": "Microsoft.Network/connections",
+      "apiVersion": "2020-06-01",
+      "name": "S2S-LGW-CON-OP",
+      "location": "[variables('locationeu')]",
+      "properties": {
+        "connectionType": "IPsec",
+        "connectionProtocol": "IKEv2",
+        "sharedKey": "[parameters('psk')]",
+        "virtualNetworkGateway1": {
+          "properties": {},
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('gatewaynameop'))]"
+        },
+        "localNetworkGateway2": {
+          "properties": {},
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', variables('localgatewaynameop'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('gatewaynameop'))]",
+        "[resourceId('Microsoft.Network/localNetworkGateways', variables('localgatewaynameop'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('NetworkSecurityGroupNameEUS')]",
+      "location": "[variables('locationeus')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow3389",
+            "properties": {
+              "priority": 1000,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "3389",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPInbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Inbound",
+              "destinationPortRange": "*",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allowICMPOutbound",
+            "properties": {
+              "priority": 1500,
+              "access": "Allow",
+              "direction": "Outbound",
+              "destinationPortRange": "3389",
+              "protocol": "Icmp",
+              "sourcePortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('vnetnameeus')]",
+      "location": "[variables('locationeus')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefixeus')]"
+          ]
+        },
+        "enableDdosProtection": false,
+        "enableVmProtection": false,
+        "subnets": [
+          {
+            "name": "[variables('snet1nameeus')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix1eus')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEUS'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('snet2nameeus')]",
+            "properties": {
+              "addressPrefix": "[variables('SubnetPrefix2eus')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEUS'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('NetworkSecurityGroupNameEUS'))]"
+      ]
+    }
+  ]
+}

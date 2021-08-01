@@ -1,8 +1,6 @@
 //parameters west europe on-prem
 
-@secure ()
-param psk string
-
+param psk string = 'Secret01'
 
 //variables west europe on-prem
 var NetworkSecurityGroupNameOP = '${vnetnameop}-${'nsg'}'
@@ -12,7 +10,7 @@ var snet2nameop = 'snet-002-${'op'}'
 var addressPrefixop = '172.16.0.0/15'
 var SubnetPrefix1op = '172.16.1.0/24'
 var SubnetPrefix2op = '172.16.2.0/24'
-var GatewayPrefixop = '172.16.3.224/27'
+var GatewaySubnetPrefix = '172.16.3.0/27'
 var locationop = 'westeurope'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
 var gatewaysubnet = 'GatewaySubnet'
@@ -28,21 +26,16 @@ var addressPrefixeu = '10.0.0.0/15'
 var SubnetPrefix1eu = '10.0.0.0/24'
 var SubnetPrefix2eu = '10.1.0.0/24'
 var locationeu = 'westeurope'
-var GatewayPrefixeu = '172.16.3.224/27'
-var gatewaynameeu = '${vnetnameeu}-${'gw'}'
-var subnetrefeu = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameop, gatewaysubnet)
-var localgatewaynameeu = '${vnetnameop}-lgw'
 
 // variables east us
 var NetworkSecurityGroupNameEUS = '${vnetnameeus}-${'nsg'}'
-var vnetnameeus = 'vnet-001-${'eu'}'
-var snet1nameeus = 'snet-001-${'eu'}'
-var snet2nameeus = 'snet-002-${'eu'}'
+var vnetnameeus = 'vnet-001-${'eus'}'
+var snet1nameeus = 'snet-001-${'eus'}'
+var snet2nameeus = 'snet-002-${'eus'}'
 var addressPrefixeus = '192.168.0.0/16'
 var SubnetPrefix1eus = '192.168.1.0/24'
 var SubnetPrefix2eus = '192.168.2.0/24'
-var GatewayPrefixeus = '192.3.0.224/27'
-var locationeus = 'westeurope'
+var locationeus = 'eastus'
 
 // Azure EU resources
 resource nsgeu 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
@@ -64,7 +57,7 @@ resource nsgeu 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
         }
       }
       {
-        name: 'allowICMP'
+        name: 'allowICMPInbound'
         properties: {
           priority: 1500
           access: 'Allow'
@@ -77,7 +70,7 @@ resource nsgeu 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
         }
       }
       {
-        name: 'allowICMP'
+        name: 'allowICMPOutbound'
         properties: {
           priority: 1500
           access: 'Allow'
@@ -127,77 +120,6 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
-resource pipeu 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: '${gatewaynameeu}-pipeu'
-  location: locationeu
-  properties: {
-    publicIPAllocationMethod: 'Dynamic'
-  }
-}
-
-resource Gatewayeu 'Microsoft.Network/virtualNetworkGateways@2020-06-01' = {
-  name: gatewaynameeu
-  location: locationeu
-  properties: {
-    gatewayType: 'Vpn'
-    ipConfigurations: [
-      {
-        name: 'default'
-        properties: {
-          publicIPAddress: {
-            id: pipeu.id
-          }
-          subnet: {
-            id: subnetrefeu
-          }
-          privateIPAllocationMethod: 'Dynamic'
-        }
-      }
-    ]
-    sku: {
-      name: 'VpnGw2'
-      tier: 'VpnGw2'
-    }
-    vpnType: 'RouteBased'
-    vpnGatewayGeneration: 'Generation2'
-    activeActive: false
-    enableBgp: false
-  }
-}
-
-resource LocalGatewayeu 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
-  name: localgatewaynameeu
-  location: locationeu
-  properties: {
-    localNetworkAddressSpace: {
-      addressPrefixes: [
-        SubnetPrefix1eu
-      ]
-    }
-    gatewayIpAddress: GatewayPrefixeu
-  }
-}
-
-resource s2sconnectioneu 'Microsoft.Network/connections@2020-06-01' = {
-  name: 'S2S-LGW-CON-EU'
-  location: locationeu
-  properties: {
-    connectionType: 'IPsec'
-    connectionProtocol: 'IKEv2'
-    virtualNetworkGateway1: {
-      id: Gatewayeu.id
-      properties: {
-        
-      }
-    }
-    enableBgp: false
-    sharedKey: psk
-    localNetworkGateway2: {
-      id: LocalGatewayeu.id
-    }
-  }
-}
-
 //On-prem Resources
 
 resource nsgop 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
@@ -219,7 +141,7 @@ resource nsgop 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
         }
       }
       {
-        name: 'allowICMP'
+        name: 'allowICMPInbound'
         properties: {
           priority: 1500
           access: 'Allow'
@@ -232,7 +154,7 @@ resource nsgop 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
         }
       }
       {
-        name: 'allowICMP'
+        name: 'allowICMPOutbound'
         properties: {
           priority: 1500
           access: 'Allow'
@@ -278,10 +200,15 @@ resource vnetop 'Microsoft.Network/virtualNetworks@2020-06-01' = {
           }
         }
       }
+      {
+        name: gatewaysubnet
+        properties: {
+          addressPrefix: GatewaySubnetPrefix
+        }
+      }
     ]
   }
 }
-
 
 resource pipop 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   name: '${gatewaynameop}-pip'
@@ -323,33 +250,110 @@ resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' = {
 
 resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
   name: localgatewaynameop
-  location: locationop
+  location: locationeu
   properties: {
-    localNetworkAddressSpace: {
-      addressPrefixes: [
-        SubnetPrefix1op
-      ]
-    }
-    gatewayIpAddress: GatewayPrefixop
+    gatewayIpAddress: '20.25.3.4'
   }
 }
 
-resource s2sconnection 'Microsoft.Network/connections@2020-06-01' = {
-  name: 'S2S-LGW-CON'
-  location: locationop
+resource s2sconnectionop 'Microsoft.Network/connections@2020-06-01' = {
+  name: 'S2S-LGW-CON-OP'
+  location: locationeu
   properties: {
     connectionType: 'IPsec'
     connectionProtocol: 'IKEv2'
+    sharedKey: psk
     virtualNetworkGateway1: {
+      properties: {}
       id: Gatewayop.id
     }
-    enableBgp: false
-    sharedKey: psk
     localNetworkGateway2: {
+      properties: {
+      }
       id: LocalGatewayOP.id
     }
   }
 }
 
 // east us resources
+resource nsgeus 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
+  name: NetworkSecurityGroupNameEUS
+  location: locationeus
+  properties: {
+    securityRules: [
+      {
+        name: 'allow3389'
+        properties: {
+          priority: 1000
+          access: 'Allow'
+          direction: 'Inbound'
+          destinationPortRange: '3389'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'allowICMPInbound'
+        properties: {
+          priority: 1500
+          access: 'Allow'
+          direction: 'Inbound'
+          destinationPortRange: '*'
+          protocol: 'Icmp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'allowICMPOutbound'
+        properties: {
+          priority: 1500
+          access: 'Allow'
+          direction: 'Outbound'
+          destinationPortRange: '3389'
+          protocol: 'Icmp'
+          sourcePortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
+  }
+}
 
+resource vneteus 'Microsoft.Network/virtualNetworks@2020-06-01' = {
+  name: vnetnameeus
+  location: locationeus
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        addressPrefixeus
+      ]
+    }
+    enableDdosProtection: false
+    enableVmProtection: false
+    subnets: [
+      {
+        name: snet1nameeus
+        properties: {
+          addressPrefix: SubnetPrefix1eus
+          networkSecurityGroup: {
+            id: nsgeus.id
+          }
+        }
+      }
+      {
+        name: snet2nameeus
+        properties: {
+          addressPrefix: SubnetPrefix2eus
+          networkSecurityGroup: {
+            id: nsgeus.id
+          }
+        }
+      }
+    ]
+  }
+}
