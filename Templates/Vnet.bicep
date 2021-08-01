@@ -26,6 +26,7 @@ var addressPrefixeu = '10.0.0.0/15'
 var SubnetPrefix1eu = '10.0.0.0/24'
 var SubnetPrefix2eu = '10.1.0.0/24'
 var locationeu = 'westeurope'
+var FirewallSubnet = '10.1.1.0/26'
 
 // variables east us
 var NetworkSecurityGroupNameEUS = '${vnetnameeus}-${'nsg'}'
@@ -114,6 +115,12 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' = {
           networkSecurityGroup: {
             id: nsgeu.id
           }
+        }
+      }
+      {
+        name: 'AzureFirewallSubnet'
+        properties: {
+          addressPrefix: FirewallSubnet
         }
       }
     ]
@@ -220,6 +227,9 @@ resource pipop 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 
 resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' = {
   name: gatewaynameop
+  dependsOn: [
+    vnetop
+  ]
   location: locationop
   properties: {
     gatewayType: 'Vpn'

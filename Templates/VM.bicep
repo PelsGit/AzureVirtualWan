@@ -1,7 +1,6 @@
 //parameters
 param adminUsername string = 'admin01'
-param vmsize string = 'Standard_D2_v3'
-param adminPassword string = 'secretpassw0rd'
+param adminPassword string = 'secretpassw0rd!'
 
 //variables west europe
 var subnetrefeu = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameeu, snet1nameeu)
@@ -21,8 +20,8 @@ var locationOP = 'westeurope'
 
 //variables east us
 var subnetrefeus = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameeus, snet1nameeus)
-var vnetnameeus = 'vnet-001-${'eu'}'
-var snet1nameeus = 'snet-001-${'eu'}'
+var vnetnameeus = 'vnet-001-${'eus'}'
+var snet1nameeus = 'snet-001-${'eus'}'
 var NicNameeus = '${VmNameeus}-nic'
 var VmNameeus = 'vm-001-eaus'
 var locationeus = 'eastus'
@@ -49,41 +48,42 @@ resource vmeu 'Microsoft.Compute/virtualMachines@2020-06-01' = {
   name: VmNameeu
   location: locationeu
   properties: {
-    osProfile: {
-      adminUsername: adminUsername
-      adminPassword: adminPassword
-      windowsConfiguration: {
-        provisionVMAgent: true
-      }
-    }
     hardwareProfile: {
-      vmSize: vmsize
+      vmSize: 'Standard_D2s_v3'
     }
     storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+      }
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
         offer: 'WindowsServer'
         sku: '2019-Datacenter'
         version: 'latest'
       }
-      osDisk: {
-        createOption: 'FromImage'
-      }
-      dataDisks: []
     }
     networkProfile: {
       networkInterfaces: [
         {
-          properties: {
-            primary: true
-          }
           id: niceu.id
         }
       ]
     }
+    osProfile: {
+      computerName: VmNameeu
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+      windowsConfiguration: {
+        enableAutomaticUpdates: true
+        provisionVMAgent: true
+      }
+    }
     diagnosticsProfile: {
       bootDiagnostics: {
-        enabled: false
+        enabled: true
       }
     }
   }
@@ -111,41 +111,42 @@ resource vmOP 'Microsoft.Compute/virtualMachines@2020-06-01' = {
   name: VmNameOP
   location: locationOP
   properties: {
-    osProfile: {
-      adminUsername: adminUsername
-      adminPassword: adminPassword
-      windowsConfiguration: {
-        provisionVMAgent: true
-      }
-    }
     hardwareProfile: {
-      vmSize: vmsize
+      vmSize: 'Standard_D2s_v3'
     }
     storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+      }
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
         offer: 'WindowsServer'
         sku: '2019-Datacenter'
         version: 'latest'
       }
-      osDisk: {
-        createOption: 'FromImage'
-      }
-      dataDisks: []
     }
     networkProfile: {
       networkInterfaces: [
         {
-          properties: {
-            primary: true
-          }
           id: nicOP.id
         }
       ]
     }
+    osProfile: {
+      computerName: VmNameeu
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+      windowsConfiguration: {
+        enableAutomaticUpdates: true
+        provisionVMAgent: true
+      }
+    }
     diagnosticsProfile: {
       bootDiagnostics: {
-        enabled: false
+        enabled: true
       }
     }
   }
@@ -173,41 +174,42 @@ resource vmeus 'Microsoft.Compute/virtualMachines@2020-06-01' = {
   name: VmNameeus
   location: locationeus
   properties: {
-    osProfile: {
-      adminUsername: adminUsername
-      adminPassword: adminPassword
-      windowsConfiguration: {
-        provisionVMAgent: true
-      }
-    }
     hardwareProfile: {
-      vmSize: vmsize
+      vmSize: 'Standard_D2s_v3'
     }
     storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
+      }
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
         offer: 'WindowsServer'
         sku: '2019-Datacenter'
         version: 'latest'
       }
-      osDisk: {
-        createOption: 'FromImage'
-      }
-      dataDisks: []
     }
     networkProfile: {
       networkInterfaces: [
         {
-          properties: {
-            primary: true
-          }
           id: niceus.id
         }
       ]
     }
+    osProfile: {
+      computerName: VmNameeus
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+      windowsConfiguration: {
+        enableAutomaticUpdates: true
+        provisionVMAgent: true
+      }
+    }
     diagnosticsProfile: {
       bootDiagnostics: {
-        enabled: false
+        enabled: true
       }
     }
   }
