@@ -16,6 +16,8 @@ var gatewaynameop = '${vnetnameop}-${'gw'}'
 var gatewaysubnet = 'GatewaySubnet'
 var subnetrefop = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameop, gatewaysubnet)
 var localgatewaynameop = '${vnetnameop}-lgw'
+var bgpsettings = 65515
+var bgppeeringaddress = '172.16.1.1'
 
 //variables west europe
 var NetworkSecurityGroupNameEU = '${vnetnameeu}-${'nsg'}'
@@ -233,6 +235,10 @@ resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' = {
   location: locationop
   properties: {
     gatewayType: 'Vpn'
+    bgpSettings: {
+      asn: bgpsettings
+      bgpPeeringAddress: bgppeeringaddress
+    }
     ipConfigurations: [
       {
         name: 'default'
