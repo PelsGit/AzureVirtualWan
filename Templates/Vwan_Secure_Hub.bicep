@@ -1,6 +1,10 @@
 // VWAN Europe Parameters
 param psk string = 'Secret01'
 
+//Vwan LocalGateway variables
+var localgatewaynameop = '${vnetnameop}-lgw'
+var locationop = 'westeurope'
+
 //Vwan Europe Variables
 var VwanName = 'PelstestVwan'
 var LocationEU = 'westeurope'
@@ -9,19 +13,15 @@ var VwanHubPrefix = '192.168.10.0/24'
 var FirewallNameEU = 'FirewallEU'
 var VwanHubEU_to_Onprem_Con = '${HubEUName}/${'VnetOnPem_Connection'}'
 var vnetnameeu = 'vnet-001-${'eu'}'
-var bgpsettings = 65432
+var bgpsettings = 65515
 var bgppeeringaddress = '172.16.1.1'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
 var vnetnameop = 'vnet-001-${'op'}'
 var vpnsitelink1 = '${virtualGatewaySiteEU}-link1'
 var virtualGatewaySiteEU = 'Europe'
 var virtualGatewayNameEU = 'VirtualGWEU'
-var VPNGatewayConnectionEU1 = '${virtualGatewayNameEU}/sitecon01'
-
-//Vwan Europe Resources
-resource azureFirewallEU 'Microsoft.Network/azureFirewalls@2020-05-01' existing = {
-  name: FirewallNameEU
-}
+var VPNGatewayConnectionEU1 = 'sitecon01'
+var FirewallPolicyNameEu = 'FirewalPolEU'
 
 resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' existing= {
   name: vnetnameeu
@@ -30,6 +30,94 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' existing= {
 resource pipop 'Microsoft.Network/publicIPAddresses@2020-06-01' existing= {
   name: '${gatewaynameop}-pip'
 }
+
+resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' existing = {
+  name: gatewaynameop
+}
+
+resource firewallPolicyEU 'Microsoft.Network/firewallPolicies@2020-11-01' = {
+  name: FirewallPolicyNameEu
+  location: LocationEU
+  properties: {
+    sku: {
+      tier: 'Standard'
+    }
+    threatIntelWhitelist: {
+      fqdns: []
+      ipAddresses: []
+    }
+  }
+  tags: {}
+  dependsOn: []
+}
+
+resource firewallPolicyEU_DefaultNetworkRuleCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2020-11-01' = {
+  parent: firewallPolicyEU
+  name: 'DefaultNetworkRuleCollectionGroup'
+  properties: {
+    priority: 200
+    ruleCollections: [
+      {
+        name: 'AllowAll'
+        priority: 200
+        action: {
+          type: 'Allow'
+        }
+        rules: [
+          {
+            name: 'Allow_all'
+            ipProtocols: [
+              'Any'
+            ]
+            destinationPorts: [
+              '*'
+            ]
+            sourceAddresses: [
+              '*'
+            ]
+            sourceIpGroups: []
+            ruleType: 'NetworkRule'
+            destinationIpGroups: []
+            destinationAddresses: [
+              '*'
+            ]
+            destinationFqdns: []
+          }
+        ]
+        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
+      }
+    ]
+  }
+}
+
+resource azureFirewallEU 'Microsoft.Network/azureFirewalls@2020-05-01' = {
+  name: FirewallNameEU
+  location: LocationEU
+  properties: {
+    sku: {
+      name: 'AZFW_Hub'
+      tier: 'Standard'
+    }
+    firewallPolicy: {
+      id: firewallPolicyEU.id
+    }
+    hubIPAddresses: {
+      publicIPs:{
+        count: 1
+      }
+    }
+    virtualHub:{
+     id: VwanHubEU.id
+    }
+    
+  }
+  dependsOn: [
+    virtualGatewayEU
+    VwanHubEU
+    firewallPolicyEU_DefaultNetworkRuleCollectionGroup
+  ]
+}
+
 
 resource VwanEU 'Microsoft.Network/virtualWans@2021-02-01' = {
   name: VwanName
@@ -48,9 +136,6 @@ resource VwanHubEU 'Microsoft.Network/virtualHubs@2021-02-01' ={
       id: VwanEU.id
     }
     addressPrefix: VwanHubPrefix
-    azureFirewall: {
-      id: azureFirewallEU.id
-    }
   }
 }
 
@@ -76,6 +161,10 @@ resource VwanhubEU_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTabl
       'default'
     ]
   }
+  dependsOn: [
+    VwanHubEU
+    azureFirewallEU
+    ]
 }
 
 resource VwanHubEU_to_OnPremEU 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {
@@ -105,6 +194,7 @@ resource VwanHubEU_to_OnPremEU 'Microsoft.Network/virtualHubs/hubVirtualNetworkC
   }
   dependsOn: [
     VwanHubEU
+    VwanhubEU_defaultRouteTable
   ]
 }
 
@@ -129,7 +219,7 @@ resource virtualGatewaySite_EU 'Microsoft.Network/vpnSites@2020-05-01' = {
             linkProviderName: 'Azure'
             linkSpeedInMbps: 500
           }
-          ipAddress: pipop.id
+          ipAddress: pipop.properties.ipAddress
         }
       }
     ]
@@ -148,12 +238,13 @@ resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
       id: VwanHubEU.id
     }
     bgpSettings: {
-      asn: 65515
+      asn: bgpsettings
     }
   }
 }
 
 resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@2020-05-01' = {
+  parent: virtualGatewayEU
   name: VPNGatewayConnectionEU1
   properties: {
     remoteVpnSite: {
@@ -164,7 +255,7 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
         name: vpnsitelink1
         properties: {
           vpnSiteLink: {
-            id: resourceId('Microsoft.Network/vpnSites/vpnSiteLinks', virtualGatewayNameEU, vpnsitelink1)
+            id: resourceId('Microsoft.Network/vpnSites/vpnSiteLinks', virtualGatewaySiteEU, vpnsitelink1)
           }
           enableBgp: true
           sharedKey: psk
@@ -189,5 +280,36 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
   }
   dependsOn: [
     virtualGatewayEU
+    VwanhubEU_defaultRouteTable
   ]
+}
+
+resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
+  name: localgatewaynameop
+  location: locationop
+  properties: {
+    gatewayIpAddress: virtualGatewayEU.properties.ipConfigurations[0].publicIpAddress
+  }
+  dependsOn: [
+    virtualGatewayEU
+  ]
+}
+
+resource s2sconnectionop 'Microsoft.Network/connections@2020-06-01' = {
+  name: 'S2S-LGW-CON-OP'
+  location: locationop
+  properties: {
+    connectionType: 'IPsec'
+    connectionProtocol: 'IKEv2'
+    sharedKey: psk
+    virtualNetworkGateway1: {
+      properties: {}
+      id: Gatewayop.id
+    }
+    localNetworkGateway2: {
+      properties: {
+      }
+      id: LocalGatewayOP.id
+    }
+  }
 }

@@ -4,9 +4,14 @@ var FirewallNameEU = 'FirewallEU'
 var LocationEU = 'westeurope'
 var FirewallPolicyNameEu = 'FirewalPolEU'
 var FirewallPipEUName = 'FirewallPipEU'
+var virtualGatewayNameEU = 'VirtualGWEU'
 
 // Variables Europe VNET reference
 var vnetnameeu = 'vnet-001-${'eu'}'
+
+resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' existing = {
+  name: virtualGatewayNameEU
+}
 
 resource firewallPolicyEU 'Microsoft.Network/firewallPolicies@2020-11-01' = {
   name: FirewallPolicyNameEu
@@ -101,5 +106,11 @@ resource azureFirewallEU 'Microsoft.Network/azureFirewalls@2020-05-01' = {
     firewallPolicy: {
       id: firewallPolicyEU.id
     }
+    virtualHub:{
+      
+    }
   }
+  dependsOn: [
+    virtualGatewayEU
+  ]
 }

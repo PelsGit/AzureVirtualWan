@@ -1,7 +1,4 @@
 //parameters west europe on-prem
-
-param psk string = 'Secret01'
-
 //variables west europe on-prem
 var NetworkSecurityGroupNameOP = '${vnetnameop}-${'nsg'}'
 var vnetnameop = 'vnet-001-${'op'}'
@@ -15,8 +12,7 @@ var locationop = 'westeurope'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
 var gatewaysubnet = 'GatewaySubnet'
 var subnetrefop = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameop, gatewaysubnet)
-var localgatewaynameop = '${vnetnameop}-lgw'
-var bgpsettings = 65515
+var bgpsettings = 65010
 var bgppeeringaddress = '172.16.1.1'
 
 //variables west europe
@@ -260,34 +256,7 @@ resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' = {
     vpnType: 'RouteBased'
     vpnGatewayGeneration: 'Generation2'
     activeActive: false
-    enableBgp: false
-  }
-}
-
-resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
-  name: localgatewaynameop
-  location: locationeu
-  properties: {
-    gatewayIpAddress: '20.25.3.4'
-  }
-}
-
-resource s2sconnectionop 'Microsoft.Network/connections@2020-06-01' = {
-  name: 'S2S-LGW-CON-OP'
-  location: locationeu
-  properties: {
-    connectionType: 'IPsec'
-    connectionProtocol: 'IKEv2'
-    sharedKey: psk
-    virtualNetworkGateway1: {
-      properties: {}
-      id: Gatewayop.id
-    }
-    localNetworkGateway2: {
-      properties: {
-      }
-      id: LocalGatewayOP.id
-    }
+    enableBgp: true
   }
 }
 
