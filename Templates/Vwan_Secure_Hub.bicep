@@ -13,8 +13,6 @@ var VwanHubPrefix = '192.168.10.0/24'
 var FirewallNameEU = 'FirewallEU'
 var VwanHubEU_to_Onprem_Con = '${HubEUName}/${'VnetOnPem_Connection'}'
 var vnetnameeu = 'vnet-001-${'eu'}'
-var bgpsettings = 65515
-var bgppeeringaddress = '172.16.1.1'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
 var vnetnameop = 'vnet-001-${'op'}'
 var vpnsitelink1 = '${virtualGatewaySiteEU}-link1'
@@ -22,6 +20,7 @@ var virtualGatewaySiteEU = 'Europe'
 var virtualGatewayNameEU = 'VirtualGWEU'
 var VPNGatewayConnectionEU1 = 'sitecon01'
 var FirewallPolicyNameEu = 'FirewalPolEU'
+var bgppeeringaddressopgw = '172.16.1.1'
 
 resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' existing= {
   name: vnetnameeu
@@ -212,8 +211,8 @@ resource virtualGatewaySite_EU 'Microsoft.Network/vpnSites@2020-05-01' = {
         name: vpnsitelink1
         properties: {
           bgpProperties: {
-            asn: bgpsettings
-            bgpPeeringAddress: bgppeeringaddress
+            asn: 65010
+            bgpPeeringAddress: bgppeeringaddressopgw
           }
           linkProperties: {
             linkProviderName: 'Azure'
@@ -238,7 +237,7 @@ resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
       id: VwanHubEU.id
     }
     bgpSettings: {
-      asn: bgpsettings
+      asn: 65515
     }
   }
 }
@@ -289,6 +288,10 @@ resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
   location: locationop
   properties: {
     gatewayIpAddress: virtualGatewayEU.properties.ipConfigurations[0].publicIpAddress
+    bgpSettings: {
+      asn: 65515
+      bgpPeeringAddress: virtualGatewayEU.properties.ipConfigurations[0].privateIpAddress
+    }
   }
   dependsOn: [
     virtualGatewayEU
