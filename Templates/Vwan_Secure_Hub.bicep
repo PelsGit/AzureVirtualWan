@@ -302,6 +302,7 @@ resource s2sconnectionop 'Microsoft.Network/connections@2020-06-01' = {
   name: 'S2S-LGW-CON-OP'
   location: locationop
   properties: {
+    enableBgp: true
     connectionType: 'IPsec'
     connectionProtocol: 'IKEv2'
     sharedKey: psk

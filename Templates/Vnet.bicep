@@ -19,11 +19,14 @@ var NetworkSecurityGroupNameEU = '${vnetnameeu}-${'nsg'}'
 var vnetnameeu = 'vnet-001-${'eu'}'
 var snet1nameeu = 'snet-001-${'eu'}'
 var snet2nameeu = 'snet-002-${'eu'}'
+var bastionname = 'AzureBastionSubnet'
 var addressPrefixeu = '10.0.0.0/15'
 var SubnetPrefix1eu = '10.0.0.0/24'
 var SubnetPrefix2eu = '10.1.0.0/24'
+var BastionSubnet = '10.1.2.0/26'
 var locationeu = 'westeurope'
 var FirewallSubnet = '10.1.1.0/26'
+var bastionsubnetref = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameeu, bastionname)
 
 // variables east us
 var NetworkSecurityGroupNameEUS = '${vnetnameeus}-${'nsg'}'
@@ -118,6 +121,12 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' = {
         name: 'AzureFirewallSubnet'
         properties: {
           addressPrefix: FirewallSubnet
+        }
+      }
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: BastionSubnet
         }
       }
     ]
@@ -339,5 +348,36 @@ resource vneteus 'Microsoft.Network/virtualNetworks@2020-06-01' = {
         }
       }
     ]
+  }
+}
+
+resource bastionip 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
+  name: '${bastionname}-pip'
+  location: locationeu
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'    
+  }
+}
+
+resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionname  
+  location: locationeu  
+  properties: {
+      ipConfigurations: [
+          {
+              name: 'IPConf'
+              properties: {
+                  subnet: {
+                      id: bastionsubnetref
+                  }
+                  publicIPAddress: {
+                      id: bastionip.id
+                  }
+              }
+          }
+      ]
   }
 }
