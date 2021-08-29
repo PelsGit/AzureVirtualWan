@@ -26,14 +26,13 @@ var SubnetPrefix2eu = '10.1.0.0/24'
 var BastionSubnet = '10.1.2.0/26'
 var locationeu = 'westeurope'
 var FirewallSubnet = '10.1.1.0/26'
-var bastionsubnetref = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameeu, bastionname)
 
 // variables east us
 var NetworkSecurityGroupNameEUS = '${vnetnameeus}-${'nsg'}'
 var vnetnameeus = 'vnet-001-${'eus'}'
 var snet1nameeus = 'snet-001-${'eus'}'
 var snet2nameeus = 'snet-002-${'eus'}'
-var addressPrefixeus = '192.168.0.0/16'
+var addressPrefixeus = '192.168.0.0/17'
 var SubnetPrefix1eus = '192.168.1.0/24'
 var SubnetPrefix2eus = '192.168.2.0/24'
 var locationeus = 'eastus'
@@ -123,13 +122,14 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' = {
           addressPrefix: FirewallSubnet
         }
       }
-      {
-        name: 'AzureBastionSubnet'
-        properties: {
-          addressPrefix: BastionSubnet
-        }
-      }
     ]
+  }
+}
+
+resource subNetBastion 'Microsoft.Network/virtualNetworks/subnets@2020-06-01' = {
+  name: '${vneteu.name}/AzureBastionSubnet'
+  properties: {
+    addressPrefix: BastionSubnet
   }
 }
 
@@ -371,7 +371,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
               name: 'IPConf'
               properties: {
                   subnet: {
-                      id: bastionsubnetref
+                      id: subNetBastion.id
                   }
                   publicIPAddress: {
                       id: bastionip.id

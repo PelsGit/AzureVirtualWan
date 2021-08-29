@@ -11,9 +11,9 @@ var VmNameeu = 'vm-001-weu'
 var locationeu = 'westeurope'
 
 //variables on-prem
-var subnetrefOP = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameOP, snet1nameOP)
-var vnetnameOP = 'vnet-001-${'eu'}'
-var snet1nameOP = 'snet-001-${'eu'}'
+var subnetrefOP = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameop, snet1nameop)
+var vnetnameop = 'vnet-001-${'op'}'
+var snet1nameop = 'snet-001-${'op'}'
 var NicNameOP = '${VmNameOP}-nic'
 var VmNameOP = 'vm-001-weuop'
 var locationOP = 'westeurope'
