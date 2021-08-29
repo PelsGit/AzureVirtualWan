@@ -51,88 +51,6 @@ resource Gatewayop 'Microsoft.Network/virtualNetworkGateways@2020-06-01' existin
   name: gatewaynameop
 }
 
-resource firewallPolicyEU 'Microsoft.Network/firewallPolicies@2020-11-01' = {
-  name: FirewallPolicyNameEu
-  location: LocationEU
-  properties: {
-    sku: {
-      tier: 'Standard'
-    }
-    threatIntelWhitelist: {
-      fqdns: []
-      ipAddresses: []
-    }
-  }
-  tags: {}
-  dependsOn: []
-}
-
-resource firewallPolicyEU_DefaultNetworkRuleCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2020-11-01' = {
-  parent: firewallPolicyEU
-  name: 'DefaultNetworkRuleCollectionGroup'
-  properties: {
-    priority: 200
-    ruleCollections: [
-      {
-        name: 'AllowAll'
-        priority: 200
-        action: {
-          type: 'Allow'
-        }
-        rules: [
-          {
-            name: 'Allow_all'
-            ipProtocols: [
-              'Any'
-            ]
-            destinationPorts: [
-              '*'
-            ]
-            sourceAddresses: [
-              '*'
-            ]
-            sourceIpGroups: []
-            ruleType: 'NetworkRule'
-            destinationIpGroups: []
-            destinationAddresses: [
-              '*'
-            ]
-            destinationFqdns: []
-          }
-        ]
-        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
-      }
-    ]
-  }
-}
-
-resource azureFirewallEU 'Microsoft.Network/azureFirewalls@2020-05-01' = {
-  name: FirewallNameEU
-  location: LocationEU
-  properties: {
-    sku: {
-      name: 'AZFW_Hub'
-      tier: 'Standard'
-    }
-    firewallPolicy: {
-      id: firewallPolicyEU.id
-    }
-    hubIPAddresses: {
-      publicIPs: {
-        count: 1
-      }
-    }
-    virtualHub: {
-      id: VwanHubEU.id
-    }
-  }
-  dependsOn: [
-    virtualGatewayEU
-    VwanHubEU
-    firewallPolicyEU_DefaultNetworkRuleCollectionGroup
-  ]
-}
-
 resource VwanEU 'Microsoft.Network/virtualWans@2021-02-01' = {
   name: VwanName
   location: LocationEU
@@ -153,41 +71,13 @@ resource VwanHubEU 'Microsoft.Network/virtualHubs@2021-02-01' = {
   }
 }
 
-resource VwanhubEU_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTables@2020-05-01' = {
-  parent: VwanHubEU
-  name: 'defaultRouteTable'
-  properties: {
-    routes: [
-      {
-        name: 'all_trafic'
-        destinationType: 'CIDR'
-        destinations: [
-          '10.0.0.0/8'
-          '172.16.0.0/12'
-          '192.168.0.0/16'
-          '0.0.0.0/0'
-        ]
-        nextHopType: 'ResourceId'
-        nextHop: azureFirewallEU.id
-      }
-    ]
-    labels: [
-      'default'
-    ]
-  }
-  dependsOn: [
-    VwanHubEU
-    azureFirewallEU
-  ]
-}
-
 resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {
   parent: VwanHubEU
   name: VwanHubEU_to_vneteu_Con
   properties: {
     routingConfiguration: {
       associatedRouteTable: {
-        id: VwanhubEU_defaultRouteTable.id
+        id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'defaultRouteTable')
       }
       propagatedRouteTables: {
         labels: [
@@ -195,7 +85,7 @@ resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
         ]
         ids: [
           {
-            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'noneRouteTable')
+            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'defaultRouteTable')
           }
         ]
       }
@@ -209,7 +99,6 @@ resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
   }
   dependsOn: [
     VwanHubEU
-    VwanhubEU_defaultRouteTable
   ]
 }
 
@@ -279,7 +168,7 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
     ]
     routingConfiguration: {
       associatedRouteTable: {
-        id: VwanhubEU_defaultRouteTable.id
+        id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'defaultRouteTable')
       }
       propagatedRouteTables: {
         labels: [
@@ -287,7 +176,7 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
         ]
         ids: [
           {
-            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'noneRouteTable')
+            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubEUName, 'defaultRouteTable')
           }
         ]
       }
@@ -295,7 +184,6 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
   }
   dependsOn: [
     virtualGatewayEU
-    VwanhubEU_defaultRouteTable
   ]
 }
 
@@ -335,87 +223,6 @@ resource s2sconnectionop 'Microsoft.Network/connections@2020-06-01' = {
 
 // Resources East US
 
-resource firewallPolicyUS 'Microsoft.Network/firewallPolicies@2020-11-01' = {
-  name: FirewallPolicyNameUS
-  location: locationeus
-  properties: {
-    sku: {
-      tier: 'Standard'
-    }
-    threatIntelWhitelist: {
-      fqdns: []
-      ipAddresses: []
-    }
-  }
-  tags: {}
-  dependsOn: []
-}
-
-resource firewallPolicyUS_DefaultNetworkRuleCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2020-11-01' = {
-  parent: firewallPolicyUS
-  name: 'DefaultNetworkRuleCollectionGroup'
-  properties: {
-    priority: 200
-    ruleCollections: [
-      {
-        name: 'AllowAll'
-        priority: 200
-        action: {
-          type: 'Allow'
-        }
-        rules: [
-          {
-            name: 'Allow_all'
-            ipProtocols: [
-              'Any'
-            ]
-            destinationPorts: [
-              '*'
-            ]
-            sourceAddresses: [
-              '*'
-            ]
-            sourceIpGroups: []
-            ruleType: 'NetworkRule'
-            destinationIpGroups: []
-            destinationAddresses: [
-              '*'
-            ]
-            destinationFqdns: []
-          }
-        ]
-        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
-      }
-    ]
-  }
-}
-
-resource azureFirewallUS 'Microsoft.Network/azureFirewalls@2020-05-01' = {
-  name: FirewallNameUS
-  location: locationeus
-  properties: {
-    sku: {
-      name: 'AZFW_Hub'
-      tier: 'Standard'
-    }
-    firewallPolicy: {
-      id: firewallPolicyUS.id
-    }
-    hubIPAddresses: {
-      publicIPs: {
-        count: 1
-      }
-    }
-    virtualHub: {
-      id: VwanHubUS.id
-    }
-  }
-  dependsOn: [
-    VwanHubUS
-    firewallPolicyUS_DefaultNetworkRuleCollectionGroup
-  ]
-}
-
 resource VwanHubUS 'Microsoft.Network/virtualHubs@2021-02-01' = {
   name: HubUSName
   location: locationeus
@@ -427,41 +234,13 @@ resource VwanHubUS 'Microsoft.Network/virtualHubs@2021-02-01' = {
   }
 }
 
-resource VwanhubUS_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTables@2020-05-01' = {
-  parent: VwanHubUS
-  name: 'defaultRouteTable'
-  properties: {
-    routes: [
-      {
-        name: 'all_trafic'
-        destinationType: 'CIDR'
-        destinations: [
-          '10.0.0.0/8'
-          '172.16.0.0/12'
-          '192.168.0.0/16'
-          '0.0.0.0/0'
-        ]
-        nextHopType: 'ResourceId'
-        nextHop: azureFirewallUS.id
-      }
-    ]
-    labels: [
-      'default'
-    ]
-  }
-  dependsOn: [
-    VwanHubUS
-    azureFirewallUS
-  ]
-}
-
 resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {
   parent: VwanHubUS
   name: VwanHubUS_to_vnetUS_Con
   properties: {
     routingConfiguration: {
       associatedRouteTable: {
-        id: VwanhubUS_defaultRouteTable.id
+        id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubUSName, 'defaultRouteTable')
       }
       propagatedRouteTables: {
         labels: [
@@ -469,7 +248,7 @@ resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
         ]
         ids: [
           {
-            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubUSName, 'noneRouteTable')
+            id: resourceId('Microsoft.Network/virtualHubs/hubRouteTables', HubUSName, 'defaultRouteTable')
           }
         ]
       }
@@ -483,6 +262,5 @@ resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
   }
   dependsOn: [
     VwanHubUS
-    VwanhubUS_defaultRouteTable
   ]
 }
