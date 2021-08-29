@@ -10,7 +10,6 @@ var VwanName = 'PelstestVwan'
 var LocationEU = 'westeurope'
 var HubEUName = 'VwanHubEu'
 var VwanHubPrefixEU = '10.3.0.0/24'
-var FirewallNameEU = 'FirewallEU'
 var VwanHubEU_to_vneteu_Con = '${vnetnameeu}_connection'
 var vnetnameeu = 'vnet-001-${'eu'}'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
@@ -19,7 +18,6 @@ var vpnsitelink1 = '${virtualGatewaySiteEU}-link1'
 var virtualGatewaySiteEU = 'Europe'
 var virtualGatewayNameEU = 'VirtualGWEU'
 var VPNGatewayConnectionEU1 = 'sitecon01'
-var FirewallPolicyNameEu = 'FirewalPolEU'
 var bgppeeringaddressopgw = '172.16.1.1'
 
 //Vwan East US Variables
@@ -27,9 +25,7 @@ var locationeus = 'eastus'
 var HubUSName = 'VwanHubUS'
 var VwanHubPrefixUS = '192.168.128.0/24'
 var VwanHubUS_to_vnetUS_Con = '${vnetnameeus}_connection'
-var FirewallNameUS = 'FirewallUS'
 var vnetnameeus = 'vnet-001-${'eus'}'
-var FirewallPolicyNameUS = 'FirewalPolUS'
 
 resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' existing = {
   name: vnetnameeu
@@ -81,7 +77,7 @@ resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
       }
       propagatedRouteTables: {
         labels: [
-          'none'
+          'default'
         ]
         ids: [
           {
@@ -98,7 +94,7 @@ resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
     enableInternetSecurity: true
   }
   dependsOn: [
-    VwanHubEU
+    virtualGatewayEU
   ]
 }
 
@@ -131,6 +127,9 @@ resource virtualGatewaySite_EU 'Microsoft.Network/vpnSites@2020-05-01' = {
       id: VwanEU.id
     }
   }
+  dependsOn: [
+    VwanHubUS
+  ]
 }
 
 resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
@@ -145,6 +144,9 @@ resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
       asn: 65515
     }
   }
+  dependsOn: [
+    VwanHubUS
+  ]
 }
 
 resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@2020-05-01' = {
@@ -172,7 +174,7 @@ resource VPNGatewayConnectionEU01 'Microsoft.Network/vpnGateways/vpnConnections@
       }
       propagatedRouteTables: {
         labels: [
-          'none'
+          'default'
         ]
         ids: [
           {
@@ -232,6 +234,9 @@ resource VwanHubUS 'Microsoft.Network/virtualHubs@2021-02-01' = {
     }
     addressPrefix: VwanHubPrefixUS
   }
+  dependsOn: [
+    VwanHubEU
+  ]
 }
 
 resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {
@@ -244,7 +249,7 @@ resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
       }
       propagatedRouteTables: {
         labels: [
-          'none'
+          'default'
         ]
         ids: [
           {
@@ -261,6 +266,6 @@ resource VwanHubUS_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
     enableInternetSecurity: true
   }
   dependsOn: [
-    VwanHubUS
+    virtualGatewayEU
   ]
 }
