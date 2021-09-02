@@ -127,9 +127,6 @@ resource virtualGatewaySite_EU 'Microsoft.Network/vpnSites@2020-05-01' = {
       id: VwanEU.id
     }
   }
-  dependsOn: [
-    VwanHubUS
-  ]
 }
 
 resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
