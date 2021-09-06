@@ -159,7 +159,7 @@ resource VwanhubEU_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTabl
   properties: {
     routes: [
       {
-        name: 'all_trafic'
+        name: 'all_traffic'
         destinationType: 'CIDR'
         destinations: [
           '10.0.0.0/8'
@@ -306,7 +306,7 @@ resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
     gatewayIpAddress: virtualGatewayEU.properties.ipConfigurations[0].publicIpAddress
     bgpSettings: {
       asn: 65515
-      bgpPeeringAddress: virtualGatewayEU.properties.ipConfigurations[0].privateIpAddress
+      bgpPeeringAddress: virtualGatewayEU.properties.bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]
     }
   }
   dependsOn: [

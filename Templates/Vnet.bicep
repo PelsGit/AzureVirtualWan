@@ -9,21 +9,23 @@ var SubnetPrefix1op = '172.16.1.0/24'
 var SubnetPrefix2op = '172.16.2.0/24'
 var GatewaySubnetPrefix = '172.16.3.0/27'
 var locationop = 'westeurope'
+var BastionSubnetEUOP = '172.16.4.0/26'
 var gatewaynameop = '${vnetnameop}-${'gw'}'
 var gatewaysubnet = 'GatewaySubnet'
 var subnetrefop = resourceId('Microsoft.Network/virtualNetworks/subnets', vnetnameop, gatewaysubnet)
 var bgppeeringaddressopgw = '172.16.1.1'
+var bastionhostnameeu = 'BastionHostEU'
 
 //variables west europe
 var NetworkSecurityGroupNameEU = '${vnetnameeu}-${'nsg'}'
 var vnetnameeu = 'vnet-001-${'eu'}'
 var snet1nameeu = 'snet-001-${'eu'}'
 var snet2nameeu = 'snet-002-${'eu'}'
-var bastionname = 'AzureBastionSubnet'
+var bastionhostnameeuop = 'BastionHostEUOP'
 var addressPrefixeu = '10.0.0.0/15'
 var SubnetPrefix1eu = '10.0.0.0/24'
 var SubnetPrefix2eu = '10.1.0.0/24'
-var BastionSubnet = '10.1.2.0/26'
+var BastionSubnetEU = '10.1.2.0/26'
 var locationeu = 'westeurope'
 var FirewallSubnet = '10.1.1.0/26'
 
@@ -35,6 +37,8 @@ var snet2nameeus = 'snet-002-${'eus'}'
 var addressPrefixeus = '192.168.0.0/17'
 var SubnetPrefix1eus = '192.168.1.0/24'
 var SubnetPrefix2eus = '192.168.2.0/24'
+var BastionSubnetUS = '192.168.3.0/26'
+var bastionhostnameus = 'BastionHostEUS'
 var locationeus = 'eastus'
 
 // Azure EU resources
@@ -126,10 +130,24 @@ resource vneteu 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
-resource subNetBastion 'Microsoft.Network/virtualNetworks/subnets@2020-06-01' = {
+resource subNetBastionEU 'Microsoft.Network/virtualNetworks/subnets@2020-06-01' = {
   name: '${vneteu.name}/AzureBastionSubnet'
   properties: {
-    addressPrefix: BastionSubnet
+    addressPrefix: BastionSubnetEU
+  }
+}
+
+resource subNetBastionEUOP 'Microsoft.Network/virtualNetworks/subnets@2020-06-01' = {
+  name: '${vnetop.name}/AzureBastionSubnet'
+  properties: {
+    addressPrefix: BastionSubnetEUOP
+  }
+}
+
+resource subNetBastionUS 'Microsoft.Network/virtualNetworks/subnets@2020-06-01' = {
+  name: '${vneteus.name}/AzureBastionSubnet'
+  properties: {
+    addressPrefix: BastionSubnetUS
   }
 }
 
@@ -351,8 +369,8 @@ resource vneteus 'Microsoft.Network/virtualNetworks@2020-06-01' = {
   }
 }
 
-resource bastionip 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
-  name: '${bastionname}-pip'
+resource bastionipEU 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
+  name: '${bastionhostnameeu}-pipeu'
   location: locationeu
   sku: {
     name: 'Standard'
@@ -362,8 +380,8 @@ resource bastionip 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
   }
 }
 
-resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
-  name: bastionname  
+resource bastionEU 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionhostnameeu  
   location: locationeu  
   properties: {
       ipConfigurations: [
@@ -371,10 +389,72 @@ resource bastion 'Microsoft.Network/bastionHosts@2020-05-01' = {
               name: 'IPConf'
               properties: {
                   subnet: {
-                      id: subNetBastion.id
+                      id: subNetBastionEU.id
                   }
                   publicIPAddress: {
-                      id: bastionip.id
+                      id: bastionipEU.id
+                  }
+              }
+          }
+      ]
+  }
+}
+
+resource bastionipEUOP 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
+  name: '${bastionhostnameeuop}-pip'
+  location: locationeu
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'    
+  }
+}
+
+resource bastionEUOP 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionhostnameeuop  
+  location: locationeu  
+  properties: {
+      ipConfigurations: [
+          {
+              name: 'IPConf'
+              properties: {
+                  subnet: {
+                      id: subNetBastionEUOP.id
+                  }
+                  publicIPAddress: {
+                      id: bastionipEUOP.id
+                  }
+              }
+          }
+      ]
+  }
+}
+
+resource bastionipUS 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
+  name: '${bastionhostnameus}-pip'
+  location: locationeus
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'    
+  }
+}
+
+resource bastionUS 'Microsoft.Network/bastionHosts@2020-05-01' = {
+  name: bastionhostnameus  
+  location: locationeus  
+  properties: {
+      ipConfigurations: [
+          {
+              name: 'IPConf'
+              properties: {
+                  subnet: {
+                      id: subNetBastionUS.id
+                  }
+                  publicIPAddress: {
+                      id: bastionipUS.id
                   }
               }
           }
