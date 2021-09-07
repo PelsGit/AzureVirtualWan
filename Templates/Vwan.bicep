@@ -193,7 +193,7 @@ resource LocalGatewayOP 'Microsoft.Network/localNetworkGateways@2020-06-01' = {
     gatewayIpAddress: virtualGatewayEU.properties.ipConfigurations[0].publicIpAddress
     bgpSettings: {
       asn: 65515
-      bgpPeeringAddress: virtualGatewayEU.properties.ipConfigurations[0].privateIpAddress
+      bgpPeeringAddress: virtualGatewayEU.properties.bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]
     }
   }
   dependsOn: [

@@ -9,7 +9,7 @@ module VMModule 'Templates/VM.bicep' = {
   ]
 }
 
-module VwanModule 'Templates/vwan.bicep' = {
+module VwanModule 'Templates/Vwan_Secure_Hub.bicep' = {
   name: 'VwanDeploy'
   dependsOn: [
     vnetmodule
