@@ -5,7 +5,7 @@ This lab contains two variations of the Virtual WAN deployments:
 * Azure Virtual WAN Any to Any 
 * Azure Virtual WAN Secure Hub
 
-The Labs are built using Microsoft Bicep :muscle: Infra as Code language. 
+The Labs are built using Microsoft Bicep :muscle: DSL. 
 
 For the full experience with this Lab, you can read my blogpost here:
 
@@ -65,4 +65,32 @@ module VwanModule 'Templates/Vwan_Secure_Hub.bicep' = {
 
 ![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/Bugfixes/images/vwan%20any%20to%20any%20overview.png)
 
+The any to  any configuration contains the following:
+
+* One Azure Vnet in Europe region
+* Azure Vnet in East US 2 region
+* One Azure Vnet in Europe region, mimicking an on-premise network
+* One Azure Gateway which is connected to the VWAN Hub Europe region
+* Bastion Hosts for each Vnet
+* NSGs on each Vnet, only allowing ICMP traffic
+* Virtual WAN Hubs, one for each region
+* Virtual WAN Gateway in Europe region
+
+Avarage deployment time ~50 minutes
+
 ## Secure Hub Lab Overview
+
+![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/Bugfixes/images/vwan%20secure%20hub%20overview.png)
+
+* One Azure Vnet in Europe region
+* Azure Vnet in East US 2 region
+* One Azure Vnet in Europe region, mimicking an on-premise network
+* One Azure Gateway which is connected to the VWAN Hub Europe region
+* Bastion Hosts for each Vnet
+* NSGs on each Vnet, only allowing ICMP traffic
+* Azure Firewall Policy, with an allow all rule for simplicity sake
+* Azure Firewall within each region, using the Firewall Policy and used by the Vwan Hubs
+* Virtual WAN Hubs, one for each region
+* Virtual WAN Gateway in Europe region
+
+Avarage deployment time ~1 hour
