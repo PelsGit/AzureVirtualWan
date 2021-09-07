@@ -63,4 +63,6 @@ module VwanModule 'Templates/Vwan_Secure_Hub.bicep' = {
 
 ## Any to Any Lab overview
 
+![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/Bugfixes/images/vwan%20any%20to%20any%20overview.png)
+
 ## Secure Hub Lab Overview
