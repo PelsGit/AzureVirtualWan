@@ -63,7 +63,7 @@ module VwanModule 'Templates/Vwan_Secure_Hub.bicep' = {
 
 ## Any to Any Lab overview
 
-![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/Bugfixes/images/vwan%20any%20to%20any%20overview.png)
+![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/main/images/vwan%20any%20to%20any%20overview.png)
 
 The any to  any configuration contains the following:
 
@@ -80,7 +80,7 @@ Avarage deployment time ~50 minutes
 
 ## Secure Hub Lab Overview
 
-![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/Bugfixes/images/vwan%20secure%20hub%20overview.png)
+![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/main/images/vwan%20secure%20hub%20overview.png)
 
 * One Azure Vnet in Europe region
 * Azure Vnet in East US 2 region
