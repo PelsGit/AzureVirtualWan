@@ -175,10 +175,6 @@ resource VwanhubEU_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTabl
       'default'
     ]
   }
-  dependsOn: [
-    VwanHubEU
-    azureFirewallEU
-  ]
 }
 
 resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {

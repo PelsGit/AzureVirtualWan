@@ -78,6 +78,10 @@ The any to  any configuration contains the following:
 
 Avarage deployment time ~50 minutes
 
+Click on the button below to deploy directly to Azure:
+
+![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+
 ## Secure Hub Lab Overview
 
 ![Vwan Any to Any connectivity overview](https://github.com/PelsGit/AzureVirtualWan/blob/main/images/vwan%20secure%20hub%20overview.png)
@@ -94,3 +98,7 @@ Avarage deployment time ~50 minutes
 * Virtual WAN Gateway in Europe region
 
 Avarage deployment time ~1 hour
+
+Click on the button below to deploy directly to Azure:
+
+![Deploy to Azure](https://aka.ms/deploytoazurebutton)
