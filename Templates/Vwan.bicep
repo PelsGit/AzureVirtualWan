@@ -60,6 +60,8 @@ resource VwanHubEU 'Microsoft.Network/virtualHubs@2021-02-01' = {
   name: HubEUName
   location: LocationEU
   properties: {
+    allowBranchToBranchTraffic: true
+    preferredRoutingGateway: 'VpnGateway'
     virtualWan: {
       id: VwanEU.id
     }
@@ -89,8 +91,6 @@ resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConne
     remoteVirtualNetwork: {
       id: vneteu.id
     }
-    allowHubToRemoteVnetTransit: true
-    allowRemoteVnetToUseHubVnetGateways: true
     enableInternetSecurity: true
   }
   dependsOn: [
@@ -133,6 +133,7 @@ resource virtualGatewayEU 'Microsoft.Network/vpnGateways@2020-05-01' = {
   name: virtualGatewayNameEU
   location: LocationEU
   properties: {
+    
     vpnGatewayScaleUnit: 1
     virtualHub: {
       id: VwanHubEU.id
