@@ -80,7 +80,7 @@ Avarage deployment time ~50 minutes
 
 Click on the button below to deploy directly to Azure:
 
-![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FPelsGit%2FAzureVirtualWan%2FFinetuning%2FAnytoAny.json)
 
 ## Secure Hub Lab Overview
 
@@ -101,4 +101,4 @@ Avarage deployment time ~1 hour
 
 Click on the button below to deploy directly to Azure:
 
-![Deploy to Azure](https://aka.ms/deploytoazurebutton)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FPelsGit%2FAzureVirtualWan%2FFinetuning%2FSecure_Hub_Deploy.json)
