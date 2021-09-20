@@ -133,7 +133,7 @@ resource azureFirewallEU 'Microsoft.Network/azureFirewalls@2020-05-01' = {
   ]
 }
 
-resource VwanEU 'Microsoft.Network/virtualWans@2021-02-01' = {
+resource Vwan 'Microsoft.Network/virtualWans@2021-02-01' = {
   name: VwanName
   location: LocationEU
   properties: {
@@ -147,7 +147,7 @@ resource VwanHubEU 'Microsoft.Network/virtualHubs@2021-02-01' = {
   location: LocationEU
   properties: {
     virtualWan: {
-      id: VwanEU.id
+      id: Vwan.id
     }
     addressPrefix: VwanHubPrefixEU
   }
@@ -175,10 +175,6 @@ resource VwanhubEU_defaultRouteTable 'Microsoft.Network/virtualHubs/hubRouteTabl
       'default'
     ]
   }
-  dependsOn: [
-    VwanHubEU
-    azureFirewallEU
-  ]
 }
 
 resource VwanHubEU_to_vnet 'Microsoft.Network/virtualHubs/hubVirtualNetworkConnections@2020-05-01' = {
@@ -239,7 +235,7 @@ resource virtualGatewaySite_EU 'Microsoft.Network/vpnSites@2020-05-01' = {
       }
     ]
     virtualWan: {
-      id: VwanEU.id
+      id: Vwan.id
     }
   }
 }
@@ -421,7 +417,7 @@ resource VwanHubUS 'Microsoft.Network/virtualHubs@2021-02-01' = {
   location: locationeus
   properties: {
     virtualWan: {
-      id: VwanEU.id
+      id: Vwan.id
     }
     addressPrefix: VwanHubPrefixUS
   }
