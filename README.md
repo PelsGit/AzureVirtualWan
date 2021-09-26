@@ -8,6 +8,7 @@ This lab contains two variations of the Virtual WAN deployments:
 The Labs are built using Microsoft Bicep :muscle: DSL. 
 
 For the full experience with this Lab, you can read my blogpost here:
+https://cloudsolutionist.com/azure-virtual-wan-with-microsoft-bicep/
 
 ## Deploying the Vwan Labs
 
